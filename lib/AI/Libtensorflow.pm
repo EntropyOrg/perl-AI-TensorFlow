@@ -8,16 +8,16 @@ use Capture::Tiny;
 use Path::Tiny;
 
 use FFI::Platypus;
+use FFI::C;
 
 my $ffi = FFI::Platypus->new( api => 1 );
-$ffi->lib( $class->dl_file );
+$ffi->lib( __PACKAGE__->dl_file );
 $ffi->mangler(sub {
-  my($name) = @_;
-  "TF_$name";
+	my($name) = @_;
+	"TF_$name";
 });
 
-$ffi->type('object(AI::Libtensorflow::Status)'      => 'TF_Status');
-$ffi->type('object(AI::Libtensorflow::Tensor)'      => 'TF_Tensor');
+$ffi->type('(opaque,size_t)->void', 'data_deallocator_t');
 
 # ::Libtensorflow {{{
 sub dl_file {
@@ -30,6 +30,85 @@ sub new {
 }
 
 $ffi->attach( [ Version => 'version' ] => [], 'string' );#}}}
+
+# From <include/tensorflow/c/tf_status.h>
+$ffi->load_custom_type('::Enum', 'TF_Code',
+	OK                  => 0,
+	CANCELLED           => 1,
+	UNKNOWN             => 2,
+	INVALID_ARGUMENT    => 3,
+	DEADLINE_EXCEEDED   => 4,
+	NOT_FOUND           => 5,
+	ALREADY_EXISTS      => 6,
+	PERMISSION_DENIED   => 7,
+	UNAUTHENTICATED     => 16,
+	RESOURCE_EXHAUSTED  => 8,
+	FAILED_PRECONDITION => 9,
+	ABORTED             => 10,
+	OUT_OF_RANGE        => 11,
+	UNIMPLEMENTED       => 12,
+	INTERNAL            => 13,
+	UNAVAILABLE         => 14,
+	DATA_LOSS           => 15,
+);
+
+
+
+FFI::C->ffi($ffi);
+
+package AI::Libtensorflow::Buffer {#{{{
+	FFI::C->struct( 'TF_Buffer' => [
+		data => 'opaque',
+		length => 'size_t',
+		_data_deallocator => 'opaque', # data_deallocator_t
+	]);
+
+	$ffi->attach( [ 'NewBuffer' => '_New' ] => [] => 'TF_Buffer' );
+
+	sub data_deallocator {
+		my ($self, $closure) = shift;
+		my $opaque = $ffi->cast('data_deallocator_t', 'opaque', $closure);
+		$self->_data_deallocator( $opaque );
+	}
+
+	$ffi->attach( [ 'DeleteBuffer' => '_Delete' ] => [ 'TF_Buffer' ], 'void' );
+}#}}}
+package AI::Libtensorflow::Graph {#{{{
+	FFI::C->struct( 'TF_Graph' => [
+	]);
+
+	$ffi->attach( [ 'NewGraph' => '_New' ] => [] => 'TF_Graph' );
+
+	$ffi->attach( [ 'DeleteGraph' => '_Delete' ] => [ 'TF_Graph' ], 'void' );
+}#}}}
+package AI::Libtensorflow::Status {#{{{
+	FFI::C->struct( 'TF_Status' => [
+	]);
+
+	$ffi->attach( [ 'NewStatus' => '_New' ] => [] => 'TF_Status' );
+
+  $ffi->attach( 'GetCode' => [ 'TF_Status' ], 'TF_Code' );
+	
+	$ffi->attach( [ 'DeleteStatus' => '_Delete' ] => [ 'TF_Status' ], 'void' );
+}#}}}
+package AI::Libtensorflow::ImportGraphDefOptions {#{{{
+	FFI::C->struct( 'TF_ImportGraphDefOptions' => [
+	]);
+
+	$ffi->attach( [ 'NewImportGraphDefOptions' => '_New' ] => [] => 'TF_ImportGraphDefOptions' );
+
+	$ffi->attach( [ 'DeleteImportGraphDefOptions' => '_Delete' ] => [] => 'TF_ImportGraphDefOptions' );
+}#}}}
+
+
+	$ffi->attach( [ GraphImportGraphDef => 'AI::Libtensorflow::Graph::ImportGraphDef' ],
+		[ 'TF_Graph', 'TF_Buffer', 'TF_ImportGraphDefOptions', 'TF_Status' ],
+		=> 'void',
+	);
+
+
+__END__
+
 # ::Status {{{
 package AI::Libtensorflow::Status {
 }
