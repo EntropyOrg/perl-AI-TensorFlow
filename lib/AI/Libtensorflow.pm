@@ -18,6 +18,7 @@ $ffi->mangler(sub {
 });
 
 $ffi->type('(opaque,size_t)->void', 'data_deallocator_t');
+$ffi->type('(opaque,size_t,opaque)->void', 'tensor_deallocator_t');
 
 # ::Libtensorflow {{{
 sub dl_file {
@@ -31,6 +32,7 @@ sub new {
 
 $ffi->attach( [ Version => 'version' ] => [], 'string' );#}}}
 
+# enum TF_Code {{{
 # From <include/tensorflow/c/tf_status.h>
 $ffi->load_custom_type('::Enum', 'TF_Code',
 	OK                  => 0,
@@ -51,7 +53,40 @@ $ffi->load_custom_type('::Enum', 'TF_Code',
 	UNAVAILABLE         => 14,
 	DATA_LOSS           => 15,
 );
+#}}}
+# enum TF_DataType {{{
+$ffi->load_custom_type('::Enum', 'TF_DataType',
+	{ rev => 'int', package => 'AI::Libtensorflow::DType' },
+	# from tensorflow/c/tf_datatype.h
+	[ FLOAT      => 1 ],
+	[ DOUBLE     => 2 ],
+	[ INT32      => 3 ], #// Int32 tensors are always in 'host' memory.
+	[ UINT8      => 4 ],
+	[ INT16      => 5 ],
+	[ INT8       => 6 ],
+	[ STRING     => 7 ],
+	[ COMPLEX64  => 8 ],  # // Single-precision complex
+	#[ COMPLEX    => 8 ], # // Old identifier kept for API backwards compatibility
+	[ INT64      => 9 ],
+	[ BOOL       => 10 ],
+	[ QINT8      => 11 ],#    // Quantized int8
+	[ QUINT8     => 12 ],#   // Quantized uint8
+	[ QINT32     => 13 ],#   // Quantized int32
+	[ BFLOAT16   => 14 ],# // Float32 truncated to 16 bits.  Only for cast ops.
+	[ QINT16     => 15 ],#   // Quantized int16
+	[ QUINT16    => 16 ],#  // Quantized uint16
+	[ UINT16     => 17 ],
+	[ COMPLEX128 => 18 ],# // Double-precision complex
+	[ HALF       => 19 ],
+	[ RESOURCE   => 20 ],
+	[ VARIANT    => 21 ],
+	[ UINT32     => 22 ],
+	[ UINT64     => 23 ],
+);
 
+package AI::Libtensorflow::DType {
+
+}#}}}
 
 
 FFI::C->ffi($ffi);
@@ -99,61 +134,51 @@ package AI::Libtensorflow::ImportGraphDefOptions {#{{{
 
 	$ffi->attach( [ 'DeleteImportGraphDefOptions' => '_Delete' ] => [] => 'TF_ImportGraphDefOptions' );
 }#}}}
+package AI::Libtensorflow::Tensor {#{{{
+	FFI::C->struct( 'TF_Tensor' => [
+	]);
 
+	$ffi->attach( [ 'NewTensor' => '_New' ] =>
+		[ 'TF_DataType', # dtype
 
-	$ffi->attach( [ GraphImportGraphDef => 'AI::Libtensorflow::Graph::ImportGraphDef' ],
-		[ 'TF_Graph', 'TF_Buffer', 'TF_ImportGraphDefOptions', 'TF_Status' ],
-		=> 'void',
-	);
+			'int64_t[]',   # (dims)
+			'int',         # (num_dims)
+
+			'opaque',      # (data)
+			'size_t',      # (len)
+
+			'opaque',      # tensor_deallocator_t (deallocator)
+			'opaque',      # (deallocator_arg)
+		],
+		=> 'TF_Tensor' => sub {
+			my ($xs, $class,
+				$dtype,
+				$dims, $num_dims,
+				$data, $len,
+				$deallocator, $deallocator_arg,
+			) = @_;
+			my $deallocator_ptr = $ffi->cast( 'tensor_deallocator_t', 'opaque', $deallocator);
+			$xs->(
+				$dtype,
+				$dims, $num_dims,
+				$data, $len,
+				$deallocator_ptr, $deallocator_arg,
+			);
+
+		});
+}
+#}}}
+
+$ffi->attach( [ GraphImportGraphDef => 'AI::Libtensorflow::Graph::ImportGraphDef' ],
+	[ 'TF_Graph', 'TF_Buffer', 'TF_ImportGraphDefOptions', 'TF_Status' ],
+	=> 'void',
+);
 
 
 __END__
 
 # ::Status {{{
 package AI::Libtensorflow::Status {
-}
-#}}}
-# ::DType {{{
-$ffi->load_custom_type('::DType', 'TF_DataType',
-	{ rev => 'int', package => 'AI::Libtensorflow::DType' },
-	# from tensorflow/c/tf_datatype.h
-  FLOAT      => 1,
-  DOUBLE     => 2,
-  INT32      => 3, #// Int32 tensors are always in 'host' memory.
-  UINT8      => 4,
-  INT16      => 5,
-  INT8       => 6,
-  STRING     => 7,
-  COMPLEX64  => 8, #// Single-precision complex
-  COMPLEX    => 8, #  // Old identifier kept for API backwards compatibility
-  INT64      => 9,
-  BOOL       => 10,
-  QINT8      => 11,#    // Quantized int8
-  QUINT8     => 12,#   // Quantized uint8
-  QINT32     => 13,#   // Quantized int32
-  BFLOAT16   => 14,# // Float32 truncated to 16 bits.  Only for cast ops.
-  QINT16     => 15,#   // Quantized int16
-  QUINT16    => 16,#  // Quantized uint16
-  UINT16     => 17,
-  COMPLEX128 => 18,# // Double-precision complex
-  HALF       => 19,
-  RESOURCE   => 20,
-  VARIANT    => 21,
-  UINT32     => 22,
-  UINT64     => 23,
-);
-
-package AI::Libtensorflow::DType {
-
-}#}}}
-# ::Tensor {{{
-package AI::Libtensorflow::Tensor {
-  $ffi->attach( [ AllocateTensor => 'Allocate' ] => [], 'string' );
- AllocateTensor(TF_DataType,
-
-                                                   const int64_t* dims,
-                                                   int num_dims, size_t len);
-  $ffi->attach();
 }
 #}}}
 
