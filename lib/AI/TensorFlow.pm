@@ -1,5 +1,5 @@
-package AI::Libtensorflow;
-# ABSTRACT: Bindings for Libtensorflow deep learning library
+package AI::TensorFlow;
+# ABSTRACT: Bindings for TensorFlow deep learning library
 
 use strict;
 use warnings;
@@ -20,7 +20,7 @@ $ffi->mangler(sub {
 $ffi->type('(opaque,size_t)->void', 'data_deallocator_t');
 $ffi->type('(opaque,size_t,opaque)->void', 'tensor_deallocator_t');
 
-# ::Libtensorflow {{{
+# ::TensorFlow {{{
 sub dl_file {
 	return 'libtensorflow-cpu-linux-x86_64-2.5.0/lib/libtensorflow.so';
 }
@@ -56,7 +56,7 @@ $ffi->load_custom_type('::Enum', 'TF_Code',
 #}}}
 # enum TF_DataType {{{
 $ffi->load_custom_type('::Enum', 'TF_DataType',
-	{ rev => 'int', package => 'AI::Libtensorflow::DType' },
+	{ rev => 'int', package => 'AI::TensorFlow::DType' },
 	# from tensorflow/c/tf_datatype.h
 	[ FLOAT      => 1 ],
 	[ DOUBLE     => 2 ],
@@ -84,14 +84,14 @@ $ffi->load_custom_type('::Enum', 'TF_DataType',
 	[ UINT64     => 23 ],
 );
 
-package AI::Libtensorflow::DType {
+package AI::TensorFlow::DType {
 
 }#}}}
 
 
 FFI::C->ffi($ffi);
 
-package AI::Libtensorflow::Buffer {#{{{
+package AI::TensorFlow::Buffer {#{{{
 	FFI::C->struct( 'TF_Buffer' => [
 		data => 'opaque',
 		length => 'size_t',
@@ -108,7 +108,7 @@ package AI::Libtensorflow::Buffer {#{{{
 
 	$ffi->attach( [ 'DeleteBuffer' => '_Delete' ] => [ 'TF_Buffer' ], 'void' );
 }#}}}
-package AI::Libtensorflow::Graph {#{{{
+package AI::TensorFlow::Graph {#{{{
 	FFI::C->struct( 'TF_Graph' => [
 	]);
 
@@ -116,7 +116,7 @@ package AI::Libtensorflow::Graph {#{{{
 
 	$ffi->attach( [ 'DeleteGraph' => '_Delete' ] => [ 'TF_Graph' ], 'void' );
 }#}}}
-package AI::Libtensorflow::Status {#{{{
+package AI::TensorFlow::Status {#{{{
 	FFI::C->struct( 'TF_Status' => [
 	]);
 
@@ -126,7 +126,7 @@ package AI::Libtensorflow::Status {#{{{
 	
 	$ffi->attach( [ 'DeleteStatus' => '_Delete' ] => [ 'TF_Status' ], 'void' );
 }#}}}
-package AI::Libtensorflow::ImportGraphDefOptions {#{{{
+package AI::TensorFlow::ImportGraphDefOptions {#{{{
 	FFI::C->struct( 'TF_ImportGraphDefOptions' => [
 	]);
 
@@ -134,7 +134,7 @@ package AI::Libtensorflow::ImportGraphDefOptions {#{{{
 
 	$ffi->attach( [ 'DeleteImportGraphDefOptions' => '_Delete' ] => [] => 'TF_ImportGraphDefOptions' );
 }#}}}
-package AI::Libtensorflow::Tensor {#{{{
+package AI::TensorFlow::Tensor {#{{{
 	FFI::C->struct( 'TF_Tensor' => [
 	]);
 
@@ -172,7 +172,7 @@ package AI::Libtensorflow::Tensor {#{{{
 }
 #}}}
 
-$ffi->attach( [ GraphImportGraphDef => 'AI::Libtensorflow::Graph::ImportGraphDef' ],
+$ffi->attach( [ GraphImportGraphDef => 'AI::TensorFlow::Graph::ImportGraphDef' ],
 	[ 'TF_Graph', 'TF_Buffer', 'TF_ImportGraphDefOptions', 'TF_Status' ],
 	=> 'void',
 );
@@ -181,7 +181,7 @@ $ffi->attach( [ GraphImportGraphDef => 'AI::Libtensorflow::Graph::ImportGraphDef
 __END__
 
 # ::Status {{{
-package AI::Libtensorflow::Status {
+package AI::TensorFlow::Status {
 }
 #}}}
 

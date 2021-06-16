@@ -6,7 +6,7 @@ use warnings;
 
 use lib 't/lib';
 
-use AI::Libtensorflow;
+use AI::TensorFlow;
 
 pass;
 
