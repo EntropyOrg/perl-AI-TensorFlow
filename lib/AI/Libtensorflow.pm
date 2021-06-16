@@ -66,7 +66,7 @@ $ffi->load_custom_type('::Enum', 'TF_DataType',
 	[ INT8       => 6 ],
 	[ STRING     => 7 ],
 	[ COMPLEX64  => 8 ],  # // Single-precision complex
-	#[ COMPLEX    => 8 ], # // Old identifier kept for API backwards compatibility
+	[ COMPLEX    => 8 ], # // Old identifier kept for API backwards compatibility
 	[ INT64      => 9 ],
 	[ BOOL       => 10 ],
 	[ QINT8      => 11 ],#    // Quantized int8
