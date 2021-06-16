@@ -158,13 +158,16 @@ package AI::Libtensorflow::Tensor {#{{{
 				$deallocator, $deallocator_arg,
 			) = @_;
 			my $deallocator_ptr = $ffi->cast( 'tensor_deallocator_t', 'opaque', $deallocator);
-			$xs->(
+			my $obj = $xs->(
 				$dtype,
 				$dims, $num_dims,
 				$data, $len,
 				$deallocator_ptr, $deallocator_arg,
 			);
 
+			$obj->{_PDL} = $$deallocator_arg;
+
+			$obj;
 		});
 }
 #}}}
