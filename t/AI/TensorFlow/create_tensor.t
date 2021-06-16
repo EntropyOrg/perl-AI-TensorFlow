@@ -23,7 +23,7 @@ subtest "Create a tensor" => sub {
 	my $p_data = sequence(float, 1, 5, 12);
 	my $p_dataref = $p_data->get_dataref;
 	my ($p_pointer, $p_size) = scalar_to_buffer $$p_dataref;
-	AI::TensorFlow::Tensor->_New(
+	my $tensor = AI::TensorFlow::Tensor->_New(
 		AI::TensorFlow::DType::FLOAT,
 		[ $p_data->dims ], $p_data->ndims,
 		$p_pointer, $p_size,
