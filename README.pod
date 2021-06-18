@@ -1,0 +1,24 @@
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+AI::TensorFlow - Bindings for TensorFlow deep learning library
+
+=head1 VERSION
+
+version 0.001
+
+=head1 AUTHOR
+
+EntropyOrg <zmughal@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2021 by Zakariyya Mughal.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
