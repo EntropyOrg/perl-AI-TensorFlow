@@ -4,14 +4,16 @@ package AI::TensorFlow;
 use strict;
 use warnings;
 
+use Alien::Libtensorflow;
 use Capture::Tiny;
 use Path::Tiny;
 
+use List::Util qw(first);
 use FFI::Platypus;
 use FFI::C;
 
 my $ffi = FFI::Platypus->new( api => 1 );
-$ffi->lib( __PACKAGE__->dl_file );
+$ffi->lib( first { -f } Alien::Libtensorflow->dynamic_libs );
 $ffi->mangler(sub {
 	my($name) = @_;
 	"TF_$name";
