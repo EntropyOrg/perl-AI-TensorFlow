@@ -23,10 +23,6 @@ $ffi->type('(opaque,size_t)->void', 'data_deallocator_t');
 $ffi->type('(opaque,size_t,opaque)->void', 'tensor_deallocator_t');
 
 # ::TensorFlow {{{
-sub dl_file {
-	return 'libtensorflow-cpu-linux-x86_64-2.5.0/lib/libtensorflow.so';
-}
-
 sub new {
 	my ($class) = @_;
 	bless {}, $class;
