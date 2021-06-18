@@ -196,7 +196,7 @@ package AI::TensorFlow::Tensor {#{{{
 				$deallocator_ptr, $deallocator_arg,
 			);
 
-			$obj->{_PDL} = $$deallocator_arg;
+			$obj->{PDL} = $$deallocator_arg;
 
 			$obj;
 		});
