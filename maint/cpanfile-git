@@ -1,0 +1,3 @@
+requires 'Alien::Libtensorflow',
+	git => 'https://github.com/EntropyOrg/perl-Alien-Libtensorflow.git',
+	branch => 'master';
