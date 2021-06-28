@@ -4,6 +4,7 @@ package AI::TensorFlow;
 use strict;
 use warnings;
 
+use FFI::CheckLib 0.28 qw( find_lib_or_die );
 use Alien::Libtensorflow;
 use Capture::Tiny;
 use Path::Tiny;
@@ -12,8 +13,15 @@ use List::Util qw(first);
 use FFI::Platypus;
 use FFI::C;
 
+sub lib {
+	find_lib_or_die(
+		lib => 'tensorflow',
+		symbol => ['TF_Version'],
+		alien => ['Alien::Libtensorflow'] );
+}
+
 my $ffi = FFI::Platypus->new( api => 1 );
-$ffi->lib( first { -f } Alien::Libtensorflow->dynamic_libs );
+$ffi->lib( __PACKAGE__->lib );
 $ffi->mangler(sub {
 	my($name) = @_;
 	"TF_$name";
